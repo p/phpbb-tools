@@ -1,0 +1,64 @@
+#!/bin/sh
+
+pages=42
+
+set -e
+
+if ! test -e work.index_fetched; then
+	for page in `jot $pages`; do
+		start=$(expr \( $page - 1 \) \* 25) || true
+		fetch -o "index$(printf %02d $page).html" "http://www.phpbb.com/customise/db/contributions/all/start_$start"
+	done
+	touch work.index_fetched
+fi
+
+if ! test -e work.pages_parsed; then
+	:>state.mod_links
+	for f in index*.html; do
+		grep -oE "http://www.phpbb.com/customise/db/(mod|style)/[^'\"]*/" $f >>state.mod_links
+	done
+	touch work.pages_parsed
+fi
+
+if ! test -e work.mod_pages; then
+	for link in `cat state.mod_links`; do
+		local="page.$(basename $(dirname "$link")).$(basename "$link").html"
+		test -e "$local" || fetch -o "$local" "$link"
+	done
+	touch work.mod_pages
+fi
+
+if ! test -e work.dl; then
+	for page in page.*.html; do
+		# higher id does not mean a more recent version
+		link=`grep -v mode_view "$page" |grep -o "http://www.phpbb.com/customise/db/download/id_[0-9]*" |head -1`
+		if test -z "$link"; then
+			# this happens
+			# e.g. page.mod.disable_banning_administrators_and_moderators.html
+			echo 'empty link'
+			continue
+		fi
+		local="archive.$(echo "$page" |awk -F. '{print $2}').$(echo "$page" |awk -F. '{print $3}').zip"
+		if ! test -f "$local"; then
+			fetch -o "$local" "$link"
+		fi
+	done
+	touch work.dl
+fi
+
+if ! test -e work.extract; then
+	rm -rf extract
+	mkdir extract
+	for a in archive.*.zip; do
+		extract=extract/"`echo $a |sed -e s/^archive.// -e 's/.zip$//'`"
+		mkdir "$extract"
+		unzip "$a" -d "$extract"
+		while test `ls "$extract" |wc -l` -eq 1 && test -d "$extract"/*; do
+			chmod u+rwx "$extract"/* &&
+			mv "$extract"/* extract/.move.tmp &&
+			mv extract/.move.tmp/* "$extract" &&
+			rm -r extract/.move.tmp
+		done
+	done
+	touch work.extract
+fi
