@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# Usage:
+#
+# phpbb-merge galaxyAbstractor/ticket/10836 771
+# phpbb-merge galaxyAbstractor/ticket/10836 771 develop-olympus
+# phpbb-merge galaxyAbstractor/ticket/10836 771 o
+
+set -e
+
+branch="$1"
+pr="$2"
+target="$3"
+
+if test -z "$pr"; then
+	echo "Usage: `basename $0` branch PR" 1>&2
+	exit 5
+fi
+
+if test "$target" = o -o "$target" = olympus; then
+	target=develop-olympus
+fi
+
+if test -z "$target"; then
+	target=develop
+fi
+
+echo "Merging $branch into $target for PR #$pr"
+
+current_branch=`git branch |grep '^\*' |awk '{print $2}'`
+
+if test "$current_branch" != "$target"; then
+	git checkout "$target"
+fi
+
+echo "$branch $pr $target" >$HOME/.phpbb-merge-state
+
+git merge --no-ff "$branch"
+
+git filter-branch  --msg-filter "sed -e s/remote-tracking/'PR #$pr'/" \
+	-- --max-count=1 HEAD
