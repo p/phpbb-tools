@@ -1,0 +1,128 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+die "Usage: phpbb-check-branch branch" unless @ARGV;
+
+my $branch = shift @ARGV;
+
+sub shortlog($) {
+    my ($branch) = @_;
+    my @commits_in_branch = ();
+    my %meta = ();
+    
+    open CMD, qq/git log --pretty=oneline "$branch" |/;
+    while (<CMD>) {
+        my @parts = split ' ', $_, 2;
+        my $sha = $parts[0];
+        push @commits_in_branch, $sha;
+        $meta{$sha} = $parts[1];
+    }
+    close CMD;
+    
+    (\@commits_in_branch, \%meta);
+}
+
+sub commits_in_branch($) {
+    my ($commits_in_branch, $meta) = shortlog($_[0]);
+    @{$commits_in_branch};
+}
+
+sub head_commit($) {
+    my ($branch) = @_;
+    my $head_commit;
+    
+    open CMD, qq/git log --pretty=oneline -1 "$branch" |/;
+    while (<CMD>) {
+        my @parts = split ' ';
+        $head_commit = $parts[0];
+    }
+    close CMD;
+    
+    $head_commit;
+}
+
+sub check_line($$) {
+    my ($sha, $line) = @_;
+    my $length = length $line;
+    if ($length >= 80) {
+        print "In $sha: line is ${length} chars long: $line\n";
+    }
+}
+
+sub check($) {
+    my ($sha) = @_;
+    open CMD, qq/git show $sha -s --pretty=medium |tail -n +5 |cut -c 5- |/;
+    my @lines = ();
+    my $subject = <CMD>;
+    check_line $sha, $subject;
+    unshift @lines, $subject;
+    my $space = <CMD>;
+    if ($space !~ /^\s*$/) {
+        print "In $sha: second line of commit message is not space: $space\n";
+    }
+    unshift @lines, $space;
+    while (<CMD>) {
+        check_line $sha, $_;
+        unshift @lines, $_;
+    }
+    close CMD;
+    my $ticket_ok = 0;
+    for my $line (@lines) {
+        if ($line =~ /^PHPBB3-\d+$/) {
+            if ($ticket_ok) {
+                print "$sha: ticket reference too early: $line\n";
+            } else {
+                $ticket_ok = 1;
+            }
+        } elsif ($line =~ /^\s+$/) {
+            # skip
+        } else {
+            unless ($ticket_ok) {
+                print "$sha: ticket reference missing\n";
+            }
+        }
+    }
+}
+
+my ($branch_commits, $branch_meta) = shortlog($branch);
+my @branch_commits = @{$branch_commits};
+my $develop_commit = head_commit('develop');
+my $olympus_commit = head_commit('develop-olympus');
+
+my $into = '';
+foreach my $sha (@branch_commits) {
+    if ($sha eq $develop_commit) {
+        $into = 'develop';
+        last;
+    } elsif ($sha eq $olympus_commit) {
+        $into = 'develop-olympus';
+        last;
+    }
+}
+
+die "Could not determine merge target" unless $into;
+
+print "Checking $branch for merge into $into\n";
+
+my @base_commits = commits_in_branch($into);
+my %base_hash = ();
+foreach my $sha (@base_commits) {
+    $base_hash{$sha} = 1;
+}
+my @delta_commits = ();
+foreach my $sha (@branch_commits) {
+    unless ($base_hash{$sha}) {
+        push @delta_commits, $sha;
+    }
+}
+
+print "Commits:\n";
+foreach my $sha (@delta_commits) {
+    print $branch_meta->{$sha};
+}
+
+foreach my $sha (@delta_commits) {
+    check $sha;
+}
