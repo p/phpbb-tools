@@ -63,6 +63,10 @@ sub check($) {
     check_line $sha, $subject;
     unshift @lines, $subject;
     my $space = <CMD>;
+    unless (defined $space) {
+        print "In $sha: commit message is only one line\n";
+        return;
+    }
     if ($space !~ /^\s*$/) {
         print "In $sha: second line of commit message is not space: $space\n";
     }
