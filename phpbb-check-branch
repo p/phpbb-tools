@@ -110,6 +110,7 @@ sub check($) {
         } else {
             unless ($ticket_ok) {
                 print "In $sha: ticket reference missing\n";
+                return;
             }
         }
     }
