@@ -57,12 +57,36 @@ sub check_line($$) {
 
 sub check($) {
     my ($sha) = @_;
-    open CMD, qq/git show $sha -s --pretty=medium |tail -n +5 |cut -c 5- |/;
-    my @lines = ();
-    my $subject = <CMD>;
+    open CMD, qq/git show $sha -s --pretty=medium |/;
+    my (@header_lines, @message_lines) = (), ();
+    my $in_header = 1;
+    while (<CMD>) {
+        if ($in_header) {
+            if (/^$/) {
+                $in_header = 0;
+            } else {
+                push @header_lines, $_;
+            }
+        } else {
+            my $line;
+            if (length($_) > 4) {
+                $line = substr($_, 4);
+            } else {
+                $line = $_;
+            }
+            push @message_lines, $line;
+        }
+    }
+    close CMD;
+    
+    if (grep /^Merge/, @header_lines) {
+        # merge commit
+        return;
+    }
+    
+    my $subject = $message_lines[0];
     check_line $sha, $subject;
-    unshift @lines, $subject;
-    my $space = <CMD>;
+    my $space = $message_lines[1];
     unless (defined $space) {
         print "In $sha: commit message is only one line\n";
         return;
@@ -70,14 +94,11 @@ sub check($) {
     if ($space !~ /^\s*$/) {
         print "In $sha: second line of commit message is not space: $space\n";
     }
-    unshift @lines, $space;
-    while (<CMD>) {
+    for (@message_lines) {
         check_line $sha, $_;
-        unshift @lines, $_;
     }
-    close CMD;
     my $ticket_ok = 0;
-    for my $line (@lines) {
+    for my $line (@message_lines) {
         if ($line =~ /^PHPBB3-\d+$/) {
             if ($ticket_ok) {
                 print "$sha: ticket reference too early: $line\n";
