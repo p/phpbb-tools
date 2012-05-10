@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use PHPBB::Checker;
-use Test::Simple tests => 7;
+use Test::Simple tests => 8;
 
 my ($msg, @faults);
 
@@ -31,5 +31,9 @@ ok(grep /second line of commit message is not space/, @faults);
 ok(grep /message subject has incorrect prefix/, @faults);
 
 @faults = PHPBB::Checker::check_commit('longline');
+
+ok(grep /line is .* chars long/, @faults);
+
+@faults = PHPBB::Checker::check_commit('longline2');
 
 ok(grep /line is .* chars long/, @faults);

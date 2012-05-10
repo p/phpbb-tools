@@ -1,0 +1,9 @@
+commit longline2
+Author: Oleg Pudeyev <oleg@bsdpower.com>
+Date:   Thu May 10 13:42:10 2012 -0400
+
+    [ticket/1000] This line is normal.
+
+    This line is way too long. This line is way too long. This line is way too long.
+    
+    PHPBB3-1000
