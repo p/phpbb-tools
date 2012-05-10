@@ -1,0 +1,10 @@
+#!/bin/sh
+
+name="$1"
+
+if test -z "$name"; then
+	echo "Usage: `basename $0` name" 1>&2
+	exit 5
+fi
+
+git remote add "$name" git://github.com/"$name"/phpbb3.git -f
