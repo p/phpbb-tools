@@ -3,12 +3,6 @@ package PHPBB::Checker;
 use strict;
 use warnings;
 
-#use Exporter;
-#use vars qw/@ISA @EXPORT/;
-
-#@ISA = qw/Exporter/;
-#@EXPORT = qw/shortlog commits_in_branch head_commit check_line check_commit/;
-
 sub shortlog($) {
     my ($branch) = @_;
     my @commits_in_branch = ();
