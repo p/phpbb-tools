@@ -101,7 +101,7 @@ sub check($) {
     for my $line (@message_lines) {
         if ($line =~ /^PHPBB3-\d+$/) {
             if ($ticket_ok) {
-                print "$sha: ticket reference too early: $line\n";
+                print "In $sha: ticket reference too early: $line\n";
             } else {
                 $ticket_ok = 1;
             }
@@ -109,7 +109,7 @@ sub check($) {
             # skip
         } else {
             unless ($ticket_ok) {
-                print "$sha: ticket reference missing\n";
+                print "In $sha: ticket reference missing\n";
             }
         }
     }
