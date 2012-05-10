@@ -90,9 +90,16 @@ sub check_commit($) {
         push @faults, "In $sha: commit message is only one line\n";
         goto quit;
     }
-    unless ($subject =~ /^\[(ticket|task|feature)\/[\w\-]+\]/) {
+    unless ($subject =~ /^\[(ticket|task|feature)\/([\w\-]+)\]/) {
         push @faults, "In $sha: commit message subject has incorrect prefix: $subject\n";
         goto quit;
+    }
+    my $main_ticket;
+    if ($1 eq 'ticket') {
+        $main_ticket = $2;
+        unless ($main_ticket =~ /^\d+$/) {
+            push @faults, "In $sha: ticket/ prefix is used but ticket number is invalid: $subject\n";
+        }
     }
     if ($space !~ /^\s*$/) {
         push @faults, "In $sha: second line of commit message is not space: $space\n";
@@ -102,8 +109,10 @@ sub check_commit($) {
         check_line $sha, $_;
     }
     my $ticket_ok = 0;
+    my @ticket_numbers = ();
     for my $line (reverse @message_lines) {
-        if ($line =~ /^PHPBB3-\d+$/) {
+        if ($line =~ /^PHPBB3-(\d+)$/) {
+            push @ticket_numbers, $1;
             if ($ticket_ok) {
                 print "In $sha: ticket reference too early: $line\n";
             } else {
@@ -116,6 +125,11 @@ sub check_commit($) {
                 push @faults, "In $sha: ticket reference missing\n";
                 goto quit;
             }
+        }
+    }
+    if ($main_ticket) {
+        unless (grep /^$main_ticket$/, @ticket_numbers) {
+            push @faults, "In $sha: main ticket $main_ticket is not mentioned in commit message footer\n";
         }
     }
     

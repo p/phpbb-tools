@@ -1,0 +1,9 @@
+commit noticket2
+Author: Oleg Pudeyev <oleg@bsdpower.com>
+Date:   Thu May 10 13:42:10 2012 -0400
+
+    [ticket/1000] Stuff.
+
+    Ticket reference is not to the declared ticket:
+    
+    PHPBB3-1001

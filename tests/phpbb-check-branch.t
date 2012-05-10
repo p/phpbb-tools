@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use PHPBB::Checker;
-use Test::Simple tests => 5;
+use Test::Simple tests => 6;
 
 my ($msg, @faults);
 
@@ -16,7 +16,11 @@ ok(grep /one line/, @faults);
 
 @faults = PHPBB::Checker::check_commit('noticket');
 
-ok(grep /ticket reference/, @faults);
+ok(grep /ticket reference missing/, @faults);
+
+@faults = PHPBB::Checker::check_commit('noticket2');
+
+ok(grep /is not mentioned in commit message footer/, @faults);
 
 @faults = PHPBB::Checker::check_commit('nospace');
 
