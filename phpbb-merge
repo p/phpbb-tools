@@ -38,4 +38,4 @@ echo "$branch $pr $target" >$HOME/.phpbb-merge-state
 git merge --no-ff "$branch"
 
 git filter-branch  --msg-filter "sed -e s/remote-tracking/'PR #$pr'/" \
-	-- --max-count=1 HEAD
+	-f -- --max-count=1 HEAD

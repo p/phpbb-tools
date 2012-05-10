@@ -43,6 +43,6 @@ git merge --no-ff "$branch"
 
 git filter-branch  --msg-filter \
 	"sed -e 's/^Merge branch/Merge PR #$pr branch/'" \
-	-- --max-count=1 HEAD
+	-f -- --max-count=1 HEAD
 
 rm -f $HOME/.phpbb-merge-state
