@@ -87,22 +87,22 @@ sub check_commit($) {
     check_line $sha, $subject;
     my $space = $message_lines[1];
     unless (defined $space) {
-        push @faults, "In $sha: commit message is only one line\n";
+        push @faults, "In $sha: commit message is only one line";
         goto quit;
     }
     unless ($subject =~ /^\[(ticket|task|feature)\/([\w\-]+)\]/) {
-        push @faults, "In $sha: commit message subject has incorrect prefix: $subject\n";
+        push @faults, "In $sha: commit message subject has incorrect prefix: $subject";
         goto quit;
     }
     my $main_ticket;
     if ($1 eq 'ticket') {
         $main_ticket = $2;
         unless ($main_ticket =~ /^\d+$/) {
-            push @faults, "In $sha: ticket/ prefix is used but ticket number is invalid: $subject\n";
+            push @faults, "In $sha: ticket/ prefix is used but ticket number is invalid: $subject";
         }
     }
     if ($space !~ /^\s*$/) {
-        push @faults, "In $sha: second line of commit message is not space: $space\n";
+        push @faults, "In $sha: second line of commit message is not space: $space";
         goto quit;
     }
     for (@message_lines) {
@@ -114,7 +114,7 @@ sub check_commit($) {
         if ($line =~ /^PHPBB3-(\d+)$/) {
             push @ticket_numbers, $1;
             if ($ticket_ok) {
-                print "In $sha: ticket reference too early: $line\n";
+                push @faults, "In $sha: ticket reference too early: $line";
             } else {
                 $ticket_ok = 1;
             }
@@ -122,14 +122,14 @@ sub check_commit($) {
             # skip
         } else {
             unless ($ticket_ok) {
-                push @faults, "In $sha: ticket reference missing\n";
+                push @faults, "In $sha: ticket reference missing";
                 goto quit;
             }
         }
     }
     if ($main_ticket) {
         unless (grep /^$main_ticket$/, @ticket_numbers) {
-            push @faults, "In $sha: main ticket $main_ticket is not mentioned in commit message footer\n";
+            push @faults, "In $sha: main ticket $main_ticket is not mentioned in commit message footer";
         }
     }
     

@@ -52,5 +52,9 @@ foreach my $sha (@delta_commits) {
 }
 
 foreach my $sha (@delta_commits) {
-    PHPBB::Checker::check_commit $sha;
+    my @faults = PHPBB::Checker::check_commit $sha;
+    for (@faults) {
+        print;
+        print "\n";
+    }
 }
