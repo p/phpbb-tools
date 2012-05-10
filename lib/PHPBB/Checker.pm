@@ -47,15 +47,17 @@ sub head_commit($) {
 
 sub check_line($$) {
     my ($sha, $line) = @_;
+    my @faults;
     my $length = length $line;
     if ($length >= 80) {
-        print "In $sha: line is ${length} chars long: $line\n";
+        push @faults, "In $sha: line is ${length} chars long: $line";
     }
+    @faults;
 }
 
 sub check_commit($) {
     my ($sha) = @_;
-    my @faults = ();
+    my (@faults, @sub_faults) = (), ();
     open CMD, qq/git show $sha -s --pretty=medium |/;
     my (@header_lines, @message_lines) = (), ();
     my $in_header = 1;
@@ -84,7 +86,10 @@ sub check_commit($) {
     }
     
     my $subject = $message_lines[0];
-    check_line $sha, $subject;
+    @sub_faults = check_line $sha, $subject;
+    for (@sub_faults) {
+        push @faults, $_;
+    }
     my $space = $message_lines[1];
     unless (defined $space) {
         push @faults, "In $sha: commit message is only one line";
@@ -106,7 +111,10 @@ sub check_commit($) {
         goto quit;
     }
     for (@message_lines) {
-        check_line $sha, $_;
+        @sub_faults = check_line $sha, $_;
+        for (@sub_faults) {
+            push @faults, $_;
+        }
     }
     my $ticket_ok = 0;
     my @ticket_numbers = ();
