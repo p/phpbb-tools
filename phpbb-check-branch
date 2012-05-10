@@ -98,7 +98,7 @@ sub check($) {
         check_line $sha, $_;
     }
     my $ticket_ok = 0;
-    for my $line (@message_lines) {
+    for my $line (reverse @message_lines) {
         if ($line =~ /^PHPBB3-\d+$/) {
             if ($ticket_ok) {
                 print "In $sha: ticket reference too early: $line\n";
