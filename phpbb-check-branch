@@ -55,7 +55,7 @@ sub check_line($$) {
     }
 }
 
-sub check($) {
+sub check_commit($) {
     my ($sha) = @_;
     open CMD, qq/git show $sha -s --pretty=medium |/;
     my (@header_lines, @message_lines) = (), ();
@@ -154,5 +154,5 @@ foreach my $sha (@delta_commits) {
 }
 
 foreach my $sha (@delta_commits) {
-    check $sha;
+    check_commit $sha;
 }
