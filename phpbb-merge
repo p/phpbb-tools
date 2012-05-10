@@ -2,18 +2,42 @@
 
 # Usage:
 #
+# Initial merge:
+#
 # phpbb-merge galaxyAbstractor/ticket/10836 771
 # phpbb-merge galaxyAbstractor/ticket/10836 771 develop-olympus
 # phpbb-merge galaxyAbstractor/ticket/10836 771 o
+#
+# Merging develop-olympus into develop:
+#
+# phpbb-merge -d
 
 set -e
 
-branch="$1"
-pr="$2"
-target="$3"
+branch=
+forward=false
+
+if test "$1" = -d; then
+	if test -f $HOME/.phpbb-merge-state; then
+		# freebsd's /bin/sh creates a new environment when
+		# reading in a pipe, which causes echo foo |read bar
+		# to effectively discard the read operation.
+		# use awk to work around this
+		pr=`awk '{print $2}' <$HOME/.phpbb-merge-state`
+		branch=`awk '{print $3}' <$HOME/.phpbb-merge-state`
+		forward=true
+	fi
+fi
+
+if test -z "$branch"; then
+	branch="$1"
+	pr="$2"
+	target="$3"
+fi
 
 if test -z "$pr"; then
 	echo "Usage: `basename $0` branch PR" 1>&2
+	echo "       `basename $0` -d" 1>&2
 	exit 5
 fi
 
@@ -37,5 +61,13 @@ echo "$branch $pr $target" >$HOME/.phpbb-merge-state
 
 git merge --no-ff "$branch"
 
-git filter-branch  --msg-filter "sed -e s/remote-tracking/'PR #$pr'/" \
-	-f -- --max-count=1 HEAD
+if $forward; then
+	git filter-branch  --msg-filter \
+		"sed -e 's/^Merge branch/Merge PR #$pr branch/'" \
+		-f -- --max-count=1 HEAD
+
+	rm -f $HOME/.phpbb-merge-state
+else
+	git filter-branch  --msg-filter "sed -e s/remote-tracking/'PR #$pr'/" \
+		-f -- --max-count=1 HEAD
+fi
