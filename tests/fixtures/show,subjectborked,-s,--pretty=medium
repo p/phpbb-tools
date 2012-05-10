@@ -1,0 +1,7 @@
+commit subjectborked
+Author: Oleg Pudeyev <oleg@bsdpower.com>
+Date:   Thu May 10 13:42:10 2012 -0400
+
+    This is some subject not having correct prefix.
+
+    More stuff but no ticket reference.

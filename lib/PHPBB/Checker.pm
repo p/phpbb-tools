@@ -90,6 +90,10 @@ sub check_commit($) {
         push @faults, "In $sha: commit message is only one line\n";
         goto quit;
     }
+    unless ($subject =~ /^\[(ticket|task|feature)\/[\w\-]+\]/) {
+        push @faults, "In $sha: commit message subject has incorrect prefix: $subject\n";
+        goto quit;
+    }
     if ($space !~ /^\s*$/) {
         push @faults, "In $sha: second line of commit message is not space: $space\n";
         goto quit;

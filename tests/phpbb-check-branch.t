@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use PHPBB::Checker;
-use Test::Simple tests => 4;
+use Test::Simple tests => 5;
 
 my ($msg, @faults);
 
@@ -21,3 +21,7 @@ ok(grep /ticket reference/, @faults);
 @faults = PHPBB::Checker::check_commit('nospace');
 
 ok(grep /second line of commit message is not space/, @faults);
+
+@faults = PHPBB::Checker::check_commit('subjectborked');
+
+ok(grep /message subject has incorrect prefix/, @faults);
