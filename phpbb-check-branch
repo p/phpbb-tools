@@ -3,9 +3,13 @@
 use strict;
 use warnings;
 
-die "Usage: phpbb-check-branch branch" unless @ARGV;
-
 my $branch = shift @ARGV;
+my $into_prefix = '';
+
+unless ($branch) {
+    $branch = 'HEAD';
+    $into_prefix = 'upstream/';
+}
 
 sub shortlog($) {
     my ($branch) = @_;
@@ -88,16 +92,16 @@ sub check($) {
 
 my ($branch_commits, $branch_meta) = shortlog($branch);
 my @branch_commits = @{$branch_commits};
-my $develop_commit = head_commit('develop');
-my $olympus_commit = head_commit('develop-olympus');
+my $develop_commit = head_commit($into_prefix . 'develop');
+my $olympus_commit = head_commit($into_prefix . 'develop-olympus');
 
 my $into = '';
 foreach my $sha (@branch_commits) {
     if ($sha eq $develop_commit) {
-        $into = 'develop';
+        $into = $into_prefix . 'develop';
         last;
     } elsif ($sha eq $olympus_commit) {
-        $into = 'develop-olympus';
+        $into = $into_prefix . 'develop-olympus';
         last;
     }
 }
