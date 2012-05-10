@@ -4,6 +4,7 @@ package main;
 
 use strict;
 use warnings;
+use PHPBB::Git;
 use PHPBB::Checker;
 
 my $branch = shift @ARGV;
@@ -14,10 +15,10 @@ unless ($branch) {
     $into_prefix = 'upstream/';
 }
 
-my ($branch_commits, $branch_meta) = PHPBB::Checker::shortlog($branch);
+my ($branch_commits, $branch_meta) = PHPBB::Git::shortlog($branch);
 my @branch_commits = @{$branch_commits};
-my $develop_commit = PHPBB::Checker::head_commit($into_prefix . 'develop');
-my $olympus_commit = PHPBB::Checker::head_commit($into_prefix . 'develop-olympus');
+my $develop_commit = PHPBB::Git::head_commit($into_prefix . 'develop');
+my $olympus_commit = PHPBB::Git::head_commit($into_prefix . 'develop-olympus');
 
 my $into = '';
 foreach my $sha (@branch_commits) {
@@ -34,7 +35,7 @@ die "Could not determine merge target" unless $into;
 
 print "Checking $branch for merge into $into\n";
 
-my @base_commits = PHPBB::Checker::commits_in_branch($into);
+my @base_commits = PHPBB::Git::commits_in_branch($into);
 my %base_hash = ();
 foreach my $sha (@base_commits) {
     $base_hash{$sha} = 1;
