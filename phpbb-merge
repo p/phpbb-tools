@@ -57,7 +57,9 @@ if test "$current_branch" != "$target"; then
 	git checkout "$target"
 fi
 
-echo "$branch $pr $target" >$HOME/.phpbb-merge-state
+if ! $forward; then
+	echo "$branch $pr $target" >$HOME/.phpbb-merge-state
+fi
 
 git merge --no-ff "$branch"
 
