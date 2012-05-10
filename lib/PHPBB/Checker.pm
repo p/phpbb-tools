@@ -55,6 +55,7 @@ sub check_line($$) {
 
 sub check_commit($) {
     my ($sha) = @_;
+    my @faults = ();
     open CMD, qq/git show $sha -s --pretty=medium |/;
     my (@header_lines, @message_lines) = (), ();
     my $in_header = 1;
@@ -79,18 +80,19 @@ sub check_commit($) {
     
     if (grep /^Merge/, @header_lines) {
         # merge commit
-        return;
+        goto quit;
     }
     
     my $subject = $message_lines[0];
     check_line $sha, $subject;
     my $space = $message_lines[1];
     unless (defined $space) {
-        print "In $sha: commit message is only one line\n";
-        return;
+        push @faults, "In $sha: commit message is only one line\n";
+        goto quit;
     }
     if ($space !~ /^\s*$/) {
-        print "In $sha: second line of commit message is not space: $space\n";
+        push @faults, "In $sha: second line of commit message is not space: $space\n";
+        goto quit;
     }
     for (@message_lines) {
         check_line $sha, $_;
@@ -107,11 +109,14 @@ sub check_commit($) {
             # skip
         } else {
             unless ($ticket_ok) {
-                print "In $sha: ticket reference missing\n";
-                return;
+                push @faults, "In $sha: ticket reference missing\n";
+                goto quit;
             }
         }
     }
+    
+    quit:
+    @faults;
 }
 
 1;

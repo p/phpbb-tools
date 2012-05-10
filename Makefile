@@ -8,3 +8,6 @@ build/phpbb-check-branch: build phpbb-check-branch lib/PHPBB/Checker.pm
 
 build:
 	mkdir -p build
+
+test:
+	PATH=tests/bin:$$PATH perl -I lib tests/phpbb-check-branch.t
