@@ -1,0 +1,8 @@
+commit ok
+Author: Oleg Pudeyev <oleg@bsdpower.com>
+Date:   Thu May 10 13:42:10 2012 -0400
+
+    [ticket/1000] Stuff.
+    That was not correctly split onto lines.
+
+    PHPBB3-1000
