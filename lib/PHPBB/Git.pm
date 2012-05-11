@@ -39,8 +39,11 @@ sub head_commit($) {
     $head_commit;
 }
 
-sub determine_base($$) {
-    my ($branch, $prefix, $branch_commits) = @_;
+sub determine_base($) {
+    my ($branch, $prefix, $branch_commits, $branch_meta) = @_;
+    unless (defined $prefix) {
+        $prefix = '';
+    }
     unless (defined $branch_commits) {
         ($branch_commits, $branch_meta) = shortlog($branch);
     }
@@ -55,9 +58,10 @@ sub determine_base($$) {
     for my $sha (@branch_commits) {
         for my $base (@bases) {
             my $base_commit = $base_commits{$base};
-        if ($sha eq $base_commit) {
-            $actual = $prefix . $base;
-            last;
+            if ($sha eq $base_commit) {
+                $actual = $prefix . $base;
+                last;
+            }
         }
     }
     $actual;

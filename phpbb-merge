@@ -14,7 +14,7 @@
 
 use strict;
 use warnings;
-
+use PHPBB::Git;
 use Getopt::Long;
 
 my ($branch, $pr, $target, $forward);
@@ -53,7 +53,12 @@ if ($target and $target eq 'o' || $target eq 'olympus') {
 }
 
 if (!$target) {
-    $target = 'develop';
+    $target = PHPBB::Git::determine_base($branch);
+}
+
+unless ($target) {
+    print "Could not determine target branch for merging\n";
+    exit 5;
 }
 
 print "Merging $branch into $target for PR #$pr\n";
