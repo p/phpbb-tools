@@ -39,4 +39,28 @@ sub head_commit($) {
     $head_commit;
 }
 
+sub determine_base($$) {
+    my ($branch, $prefix, $branch_commits) = @_;
+    unless (defined $branch_commits) {
+        ($branch_commits, $branch_meta) = shortlog($branch);
+    }
+    my @branch_commits = @{$branch_commits};
+    my @bases = qw/develop develop-olympus/;
+    my %base_commits = ();
+    for my $base (@bases) {
+        $base_commits{$base} = head_commit($prefix . $base);
+    }
+    
+    my $actual;
+    for my $sha (@branch_commits) {
+        for my $base (@bases) {
+            my $base_commit = $base_commits{$base};
+        if ($sha eq $base_commit) {
+            $actual = $prefix . $base;
+            last;
+        }
+    }
+    $actual;
+}
+
 1;

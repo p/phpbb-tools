@@ -17,19 +17,7 @@ unless ($branch) {
 
 my ($branch_commits, $branch_meta) = PHPBB::Git::shortlog($branch);
 my @branch_commits = @{$branch_commits};
-my $develop_commit = PHPBB::Git::head_commit($into_prefix . 'develop');
-my $olympus_commit = PHPBB::Git::head_commit($into_prefix . 'develop-olympus');
-
-my $into = '';
-foreach my $sha (@branch_commits) {
-    if ($sha eq $develop_commit) {
-        $into = $into_prefix . 'develop';
-        last;
-    } elsif ($sha eq $olympus_commit) {
-        $into = $into_prefix . 'develop-olympus';
-        last;
-    }
-}
+$into = PHPBB::Git::determine_base($branch, $into_prefix, \@branch_commits);
 
 die "Could not determine merge target" unless $into;
 
