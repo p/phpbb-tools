@@ -25,58 +25,84 @@ my $home = $ENV{'HOME'};
 my $state_file = "$home/.phpbb-merge-state";
 
 my $develop = '';
+my $continue = '';
 
-GetOptions('develop' => \$develop);
+GetOptions('develop' => \$develop, 'continue' => \$continue);
 
-if ($develop) {
+if ($develop || $continue) {
     if (-e $state_file) {
         open FH, "<$state_file" || die "Could not open $state_file: $!";
         my $contents = <FH>;
         close FH;
-        ($forward, $pr, $branch) = split ' ', $contents;
-        $forward = 1;
-        $target = 'develop';
+        if ($develop) {
+            ($forward, $pr, $branch) = split ' ', $contents;
+            $forward = 1;
+            $target = 'develop';
+        } else {
+            ($branch, $pr, $target, $forward) = split ' ', $contents;
+        }
     }
 }
 
-if (!$branch) {
-    ($branch, $pr, $target) = @ARGV;
-}
-
-if (!$pr) {
-    print "Usage: phpbb-merge branch PR\n";
-    print "       phpbb-merge -d\n";
+if ($continue && !$branch) {
+    print "-c specified but could not determine branch\n";
     exit 5;
 }
 
-if ($target and $target eq 'o' || $target eq 'olympus') {
-    $target = 'develop-olympus';
+unless ($continue) {
+    if (!$branch) {
+        ($branch, $pr, $target) = @ARGV;
+    }
+
+    if (!$pr) {
+        print "Usage: phpbb-merge branch PR\n";
+        print "       phpbb-merge -d\n";
+        exit 5;
+    }
+
+    if ($target and $target eq 'o' || $target eq 'olympus') {
+        $target = 'develop-olympus';
+    }
+
+    if (!$target) {
+        $target = PHPBB::Git::determine_base($branch);
+    }
+
+    unless ($target) {
+        print "Could not determine target branch for merging\n";
+        exit 5;
+    }
 }
 
-if (!$target) {
-    $target = PHPBB::Git::determine_base($branch);
+if ($continue) {
+    print "Continuing merge of $branch into $target for PR #$pr\n";
+} else {
+    print "Merging $branch into $target for PR #$pr\n";
 }
 
-unless ($target) {
-    print "Could not determine target branch for merging\n";
-    exit 5;
+unless ($continue) {
+    my $current_branch = `git branch |grep '^\*' |awk '{print \$2}'`;
+
+    if ($current_branch ne $target) {
+        print `git checkout "$target"`;
+    }
+
+    if (!$forward) {
+        open FH, ">$state_file" or die "Could not open state file: $!";
+        print FH "$branch $pr $target";
+        close FH;
+    }
+
+    print `git merge --no-ff "$branch"`;
+
+    if ($?) {
+        open FH, ">$state_file" or die "Could not open state file: $!";
+        print FH "$branch $pr $target $forward";
+        close FH;
+        print "Merge failed, fix and run phpbb-merge -c\n";
+        exit 6;
+    }
 }
-
-print "Merging $branch into $target for PR #$pr\n";
-
-my $current_branch = `git branch |grep '^\*' |awk '{print \$2}'`;
-
-if ($current_branch ne $target) {
-    print `git checkout "$target"`;
-}
-
-if (!$forward) {
-    open FH, ">$state_file" or die "Could not open state file: $!";
-    print FH "$branch $pr $target";
-    close FH;
-}
-
-print `git merge --no-ff "$branch"`;
 
 my $sed_cmd;
 if ($forward) {
