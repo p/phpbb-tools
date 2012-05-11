@@ -16,4 +16,5 @@ build:
 	mkdir -p build
 
 test:
+	PATH=tests/bin:$$PATH perl -I lib tests/determine_base.t
 	PATH=tests/bin:$$PATH perl -I lib tests/phpbb-check-branch.t

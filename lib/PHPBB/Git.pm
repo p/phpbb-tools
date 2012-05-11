@@ -54,17 +54,15 @@ sub determine_base($) {
         $base_commits{$base} = head_commit($prefix . $base);
     }
     
-    my $actual;
     for my $sha (@branch_commits) {
         for my $base (@bases) {
             my $base_commit = $base_commits{$base};
             if ($sha eq $base_commit) {
-                $actual = $prefix . $base;
-                last;
+                return $prefix . $base;
             }
         }
     }
-    $actual;
+    undef;
 }
 
 1;
