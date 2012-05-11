@@ -1,4 +1,3 @@
-8442b19e59e3d07129c3ef5286ada84a3ac64b98 [ticket/10561] Changed $temp_style_id to $style_id
 21639d5d5481ac5457e3b38bb848671f8be7b07b Merge remote-tracking branch 'Fyorl/ticket/10607' into develop-olympus
 08bee4c522dd68f7da591fd8ea7a674ac5b9bf67 [ticket/10650]Added permission checking and utf8 functions
 663b5f6542cc3088919836324f71413320997fe8 [ticket/10650] Cropped subject and inserted newline

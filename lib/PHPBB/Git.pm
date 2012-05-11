@@ -3,6 +3,21 @@ package PHPBB::Git;
 use strict;
 use warnings;
 
+sub commits_in_branch($) {
+    my ($branch) = @_;
+    my @commits_in_branch = ();
+    
+    open CMD, qq/git log --pretty=oneline "$branch" |/;
+    while (<CMD>) {
+        my @parts = split ' ', $_, 2;
+        my $sha = $parts[0];
+        push @commits_in_branch, $sha;
+    }
+    close CMD;
+    
+    @commits_in_branch;
+}
+
 sub shortlog($) {
     my ($branch) = @_;
     my @commits_in_branch = ();
@@ -20,11 +35,6 @@ sub shortlog($) {
     (\@commits_in_branch, \%meta);
 }
 
-sub commits_in_branch($) {
-    my ($commits_in_branch, $meta) = shortlog($_[0]);
-    @{$commits_in_branch};
-}
-
 sub head_commit($) {
     my ($branch) = @_;
     my $head_commit;
@@ -40,24 +50,32 @@ sub head_commit($) {
 }
 
 sub determine_base($) {
-    my ($branch, $prefix, $branch_commits, $branch_meta) = @_;
+    my ($branch, $prefix, $branch_commits) = @_;
+    my @branch_commits;
     unless (defined $prefix) {
         $prefix = '';
     }
-    unless (defined $branch_commits) {
-        ($branch_commits, $branch_meta) = shortlog($branch);
+    if (defined $branch_commits) {
+        @branch_commits = @{$branch_commits};
+    } else {
+        @branch_commits = commits_in_branch($branch);
     }
-    my @branch_commits = @{$branch_commits};
-    my @bases = qw/develop develop-olympus/;
+    # Important: base list should be arranged in the same order
+    # in which merges are done.
+    my @bases = qw/develop-olympus develop/;
     my %base_commits = ();
     for my $base (@bases) {
-        $base_commits{$base} = head_commit($prefix . $base);
+        my @commits = commits_in_branch($prefix . $base);
+        my %commits_hash = ();
+        for (@commits) {
+            $commits_hash{$_} = 1;
+        }
+        $base_commits{$base} = \%commits_hash;
     }
     
     for my $sha (@branch_commits) {
         for my $base (@bases) {
-            my $base_commit = $base_commits{$base};
-            if ($sha eq $base_commit) {
+            if ($base_commits{$base}->{$sha}) {
                 return $prefix . $base;
             }
         }

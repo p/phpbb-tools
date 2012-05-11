@@ -1,8 +1,12 @@
-8442b19e59e3d07129c3ef5286ada84a3ac64b98 [ticket/10561] Changed $temp_style_id to $style_id
+7d6b289671c51694f17dd5f9849abf2534b55e59 Merge branch 'develop-olympus' into develop
 21639d5d5481ac5457e3b38bb848671f8be7b07b Merge remote-tracking branch 'Fyorl/ticket/10607' into develop-olympus
 08bee4c522dd68f7da591fd8ea7a674ac5b9bf67 [ticket/10650]Added permission checking and utf8 functions
 663b5f6542cc3088919836324f71413320997fe8 [ticket/10650] Cropped subject and inserted newline
+7e2f16aafa47f8db51a12a293b0616cb75b4d12f Merge remote-tracking branch 'github-igorw/feature/class-prefix' into develop
+9236dd4c471a6f7655bd00ae422a13013a400ac4 [feature/class-prefix] Rename auth => phpbb_auth
+714fafe106a1b30d299f2e29588c0d73d6ec44b5 Merge branch 'develop-olympus' into develop
 14e727b8345e7933662a2b363736866966996839 Merge remote-tracking branch 'bantu/ticket/10658' into develop-olympus
 0df3f1c5d0a4b2c71139a7f4c02cb81ee5200809 [ticket/10658] Marked as read message now less specific.
 a84b97f58e8177eb28ad41cfb261200d523c9ff5 [ticket/10658] Fixed syntax error and renamed return variables.
+add130fa3a0ee5d2037aa7f10bea5bbef8f2824a Merge remote-tracking branch 'github-cyberalien/ticket/10752' into develop
 e27326a57bde7a73291b5e4787dbc17454d09b90 [ticket/10752] Fixes for acp_styles
