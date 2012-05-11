@@ -35,6 +35,7 @@ if ($develop) {
         close FH;
         ($forward, $pr, $branch) = split ' ', $contents;
         $forward = 1;
+        $target = 'develop';
     }
 }
 
