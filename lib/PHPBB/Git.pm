@@ -49,7 +49,7 @@ sub head_commit($) {
     $head_commit;
 }
 
-sub determine_base($) {
+sub determine_base {
     my ($branch, $prefix, $branch_commits) = @_;
     my @branch_commits;
     unless (defined $prefix) {

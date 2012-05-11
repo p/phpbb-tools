@@ -17,7 +17,7 @@ unless ($branch) {
 
 my ($branch_commits, $branch_meta) = PHPBB::Git::shortlog($branch);
 my @branch_commits = @{$branch_commits};
-$into = PHPBB::Git::determine_base($branch, $into_prefix, \@branch_commits);
+my $into = PHPBB::Git::determine_base($branch, $into_prefix, \@branch_commits);
 
 die "Could not determine merge target" unless $into;
 
