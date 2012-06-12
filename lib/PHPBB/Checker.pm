@@ -68,7 +68,9 @@ sub check_commit($) {
         push @faults, "In $sha: second line of commit message is not space: $space";
         goto quit;
     }
-    for (@message_lines) {
+    my @body_lines = @message_lines;
+    shift @body_lines;
+    for (@body_lines) {
         @sub_faults = check_line $sha, $_;
         for (@sub_faults) {
             push @faults, $_;
