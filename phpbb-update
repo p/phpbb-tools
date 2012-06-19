@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+git fetch upstream
+git checkout develop-olympus
+git reset --hard upstream/develop-olympus
+git checkout develop
+git reset --hard upstream/develop
