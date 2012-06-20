@@ -13,32 +13,33 @@ def extract_event_name(line):
     event_name = match.group(1)
     return event_name
 
-for file in get_files_matching("trigger_event('"):
+def get_lines_in_file(file):
     with open(file) as f:
         lines = f.readlines()
         for index in range(len(lines)):
             line = lines[index]
-            if line.find("trigger_event('") >= 0 and line.strip().find('extract') == 0:
-                event_name = extract_event_name(line)
-                search_index = index - 1
-                vars = None
-                while search_index >= 0:
-                    search_line = lines[search_index]
-                    if search_line.strip().find('$vars = array') == 0:
-                        # vars could be empty
-                        match = re.search("'.*'", search_line)
-                        assert match
-                        vars = [var.strip()[1:-1] for var in match.group(0).split(',')]
-                        break
-                    search_index -= 1
-                assert vars is not None
-                print event_name, '(' + ', '.join(vars) + ')'
+            yield line, index, lines
+
+for file in get_files_matching("trigger_event('"):
+    for line, index, lines in get_lines_in_file(file):
+        if line.find("trigger_event('") >= 0 and line.strip().find('extract') == 0:
+            event_name = extract_event_name(line)
+            search_index = index - 1
+            vars = None
+            while search_index >= 0:
+                search_line = lines[search_index]
+                if search_line.strip().find('$vars = array') == 0:
+                    # vars could be empty
+                    match = re.search("'.*'", search_line)
+                    assert match
+                    vars = [var.strip()[1:-1] for var in match.group(0).split(',')]
+                    break
+                search_index -= 1
+            assert vars is not None
+            print event_name, '(' + ', '.join(vars) + ')'
 
 for file in get_files_matching("phpbb_dispatcher->dispatch('"):
-    with open(file) as f:
-        lines = f.readlines()
-        for index in range(len(lines)):
-            line = lines[index]
-            if line.find('dispatcher->dispatch') >= 0 and line.strip().find('$phpbb_dispatcher') == 0:
-                event_name = extract_event_name(line)
-                print event_name
+    for line, index, lines in get_lines_in_file(file):
+        if line.find('dispatcher->dispatch') >= 0 and line.strip().find('$phpbb_dispatcher') == 0:
+            event_name = extract_event_name(line)
+            print event_name
