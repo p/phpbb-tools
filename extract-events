@@ -1,3 +1,29 @@
-#!/bin/sh
+#!/usr/bin/env python
 
-git grep trigger_event"('"|sed -e s/'.*trigger_event..//'|sed -e s/"'.*//"
+import subprocess, re
+
+output = subprocess.check_output(['git', 'grep', '-l', "trigger_event('"])
+files = output.strip().split("\n")
+
+for file in files:
+    with open(file) as f:
+        lines = f.readlines()
+        for index in range(len(lines)):
+            line = lines[index]
+            if line.find("trigger_event('") >= 0 and line.strip().find('extract') == 0:
+                match = re.search(r"'([^']+)'", line)
+                assert match
+                event_name = match.group(1)
+                search_index = index - 1
+                vars = None
+                while search_index >= 0:
+                    search_line = lines[search_index]
+                    if search_line.strip().find('$vars = array') == 0:
+                        # vars could be empty
+                        match = re.search("'.*'", search_line)
+                        assert match
+                        vars = [var.strip()[1:-1] for var in match.group(0).split(',')]
+                        break
+                    search_index -= 1
+                assert vars is not None
+                print event_name, '(' + ', '.join(vars) + ')'
