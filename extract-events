@@ -1,0 +1,3 @@
+#!/bin/sh
+
+git grep trigger_event"('"|sed -e s/'.*trigger_event..//'|sed -e s/"'.*//"
