@@ -20,6 +20,26 @@ def get_lines_in_file(file):
             line = lines[index]
             yield line, index, lines
 
+def calculate_indent(line):
+    match = re.match(r'(\s+)', line)
+    if match:
+        indent = len(match.group(1))
+    else:
+        indent = 0
+    return indent
+
+class Scope(object):
+    pass
+
+def determine_scope(line, index, lines, file):
+    indent = calculate_indent(line)
+    scope = Scope()
+    scope.file = file
+    if indent == 0:
+        # top level, must be file scope
+        pass
+    return 'file: %s' % scope.file
+
 for file in get_files_matching("trigger_event('"):
     for line, index, lines in get_lines_in_file(file):
         if line.find("trigger_event('") >= 0 and line.strip().find('extract') == 0:
@@ -36,10 +56,12 @@ for file in get_files_matching("trigger_event('"):
                     break
                 search_index -= 1
             assert vars is not None
-            print event_name, '(' + ', '.join(vars) + ')'
+            scope = determine_scope(line, index, lines, file)
+            print event_name, '(' + ', '.join(vars) + ')', scope
 
 for file in get_files_matching("phpbb_dispatcher->dispatch('"):
     for line, index, lines in get_lines_in_file(file):
         if line.find('dispatcher->dispatch') >= 0 and line.strip().find('$phpbb_dispatcher') == 0:
             event_name = extract_event_name(line)
-            print event_name
+            scope = determine_scope(line, index, lines, file)
+            print event_name, scope
