@@ -18,6 +18,8 @@ while getopts :F option; do
 	esac
 done
 
+branch=`git branch --contains HEAD |head -1 |awk '{print $2}'`
+
 if $fetch; then
 	git fetch upstream
 fi
@@ -25,3 +27,5 @@ git checkout develop-olympus
 git reset --hard upstream/develop-olympus
 git checkout develop
 git reset --hard upstream/develop
+
+git checkout "$branch"
