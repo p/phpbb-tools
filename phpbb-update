@@ -2,7 +2,25 @@
 
 set -e
 
-git fetch upstream
+usage() {
+	echo "Usage: `basename $0` [-F]" 1>&2
+	exit 5
+}
+
+fetch=true
+
+while getopts :F option; do
+	case $option in
+	F)
+		fetch=false;;
+	*)
+		usage;;
+	esac
+done
+
+if $fetch; then
+	git fetch upstream
+fi
 git checkout develop-olympus
 git reset --hard upstream/develop-olympus
 git checkout develop
