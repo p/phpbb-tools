@@ -37,7 +37,11 @@ if ($develop || $continue) {
         if ($develop) {
             ($forward, $pr, $branch) = split ' ', $contents;
             $forward = 1;
-            $target = 'develop';
+            if ($branch eq 'develop-olympus') {
+                $target = 'develop';
+            } else {
+                $target = 'develop-olympus';
+            }
         } else {
             ($branch, $pr, $target, $forward) = split ' ', $contents;
         }
@@ -87,7 +91,7 @@ unless ($continue) {
         print `git checkout "$target"`;
     }
 
-    if (!$forward) {
+    unless ($forward && $target eq 'develop') {
         open FH, ">$state_file" or die "Could not open state file: $!";
         print FH "$branch $pr $target";
         close FH;
@@ -113,7 +117,7 @@ if ($forward) {
 
 print `git filter-branch  --msg-filter "$sed_cmd" -f -- --max-count=1 HEAD`;
 
-if ($forward) {
+if ($forward && $target eq 'develop') {
     if (-e $state_file) {
         unlink($state_file);
     }
