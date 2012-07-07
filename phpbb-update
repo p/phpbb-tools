@@ -23,6 +23,14 @@ branch=`git branch --contains HEAD |head -1 |awk '{print $2}'`
 if $fetch; then
 	git fetch upstream
 fi
+
+branches=`git branch |grep prep-release |cut -c 2-`
+
+for branch in $branches; do
+	git checkout "$branch"
+	git reset --hard upstream/"$branch"
+done
+
 git checkout develop-olympus
 git reset --hard upstream/develop-olympus
 git checkout develop
