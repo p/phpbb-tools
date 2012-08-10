@@ -3,16 +3,19 @@
 set -e
 
 usage() {
-	echo "Usage: `basename $0` [-F]" 1>&2
+	echo "Usage: `basename $0` [-F] [-d]" 1>&2
 	exit 5
 }
 
 fetch=true
+develop=false
 
-while getopts :F option; do
+while getopts :Fd option; do
 	case $option in
 	F)
 		fetch=false;;
+	d)
+		develop=true;;
 	*)
 		usage;;
 	esac
@@ -36,4 +39,8 @@ git reset --hard upstream/develop-olympus
 git checkout develop
 git reset --hard upstream/develop
 
-git checkout "$branch"
+if $develop; then
+	git checkout develop
+else
+	git checkout "$branch"
+fi
