@@ -21,7 +21,7 @@ while getopts :Fd option; do
 	esac
 done
 
-branch=`git branch --contains HEAD |head -1 |awk '{print $2}'`
+orig_branch=`git branch --contains HEAD |head -1 |awk '{print $2}'`
 
 if $fetch; then
 	git fetch upstream
@@ -42,5 +42,5 @@ git reset --hard upstream/develop
 if $develop; then
 	git checkout develop
 else
-	git checkout "$branch"
+	git checkout "$orig_branch"
 fi
