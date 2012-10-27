@@ -79,7 +79,23 @@ unless ($continue) {
     if ($target and $target eq 'o' || $target eq 'olympus') {
         $target = 'develop-olympus';
     }
+}
 
+unless ($branch =~ /^[\w\/]+$/s) {
+    die "Unacceptable branch: $branch";
+}
+
+my ($account) = split /\//, $branch, 2;
+my $remotes = `git remote`;
+unless ($remotes =~ /^\Q$account\E$/m) {
+    # no remote
+    print "Adding remote $account\n";
+    print `git remote add $account git://github.com/$account/phpbb3.git`;
+}
+
+print `git fetch $account`;
+
+unless ($continue) {
     if (!$target) {
         $target = PHPBB::Git::determine_base($branch);
     }
