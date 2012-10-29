@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+cd
+cd test-phpbb
+rsync --delete --exclude .git -av  ~/phpbb/ ./
+
+PHPBB_TEST_DBNAME=phpbbtest \
+PHPBB_TEST_DBHOST=localhost \
+PHPBB_TEST_DBUSER=phpbbtest \
+PHPBB_TEST_DBMS=postgres \
+PHPBB_NO_COMPOSER_AUTOLOAD=1 \
+PHPBB_AUTOLOAD=~/shared/phpbb_autoload.php \
+php -d include_path=.:/home/pie/apps/git-phpunit-bundle:/home/pie/apps/git-phpbb3-dependencies \
+~pie/apps/git-phpunit-bundle/phpunit.php "$@"

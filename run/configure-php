@@ -1,0 +1,15 @@
+#!/bin/sh
+
+version="$1"
+
+test -z "$version" && {
+	echo "Usage: $0 version" 1>&2
+	exit 5
+}
+
+./configure --prefix=$HOME/opt/php$version \
+	--enable-fpm \
+	--with-pgsql=/usr/local \
+	--with-pdo-pgsql=/usr/local \
+	--with-mysql=/usr/local \
+	--with-pdo-mysql=/usr/local
