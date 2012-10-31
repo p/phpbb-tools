@@ -14,6 +14,9 @@ if ($ARGV[0] == '-8') {
 
 undef $/;
 for $file (@ARGV) {
+    # strip leading a/ or b/
+    $file =~ s.^[ab]/..;
+    
     open FH, $file or die "Can't open file for reading: $file";
     $_ = <FH>;
     close FH;
