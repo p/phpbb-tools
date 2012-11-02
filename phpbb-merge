@@ -63,7 +63,7 @@ unless ($continue) {
         $try_pr = 0 + $try_pr;
         $_ = `curl -s https://api.github.com/repos/phpbb/phpbb3/pulls/$try_pr`;
         unless ($?) {
-            if (/^\s+"label": "(?!phpbb)(.+):(.+)",$/m) {
+            if (/^\s+"label": "(?!phpbb)(.+):(.+)",?$/m) {
                 $branch = "$1/$2";
                 $pr = $try_pr;
             }
