@@ -81,7 +81,7 @@ unless ($continue) {
     }
 }
 
-unless ($branch =~ /^[\w\/]+$/s) {
+unless ($branch =~ /^[\w\/\-]+$/s) {
     die "Unacceptable branch: $branch";
 }
 
