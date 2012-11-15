@@ -26,8 +26,9 @@ my $state_file = "$home/.phpbb-merge-state";
 
 my $develop = '';
 my $continue = '';
+my $no_commit = '';
 
-GetOptions('develop' => \$develop, 'continue' => \$continue);
+GetOptions('develop' => \$develop, 'continue' => \$continue, 'no-commit' => \$no_commit);
 
 if ($develop || $continue) {
     if (-e $state_file) {
@@ -127,7 +128,11 @@ unless ($continue) {
         close FH;
     }
 
-    print `git merge --no-ff "$branch"`;
+    my $options = '--no-ff';
+    if ($no_commit) {
+        $options .= ' --no-commit';
+    }
+    print `git merge $options "$branch"`;
 
     if ($?) {
         open FH, ">$state_file" or die "Could not open state file: $!";
@@ -135,6 +140,14 @@ unless ($continue) {
         close FH;
         print "Merge failed, fix and run phpbb-merge -c\n";
         exit 6;
+    }
+    
+    if ($no_commit) {
+        open FH, ">$state_file" or die "Could not open state file: $!";
+        print FH "$branch $pr $target $forward";
+        close FH;
+        print "Stopping before commit, commit and run phpbb-merge -c\n";
+        exit;
     }
 }
 
