@@ -88,14 +88,16 @@ unless ($branch =~ /^[\w\/\-]+$/s) {
 
 unless ($develop) {
     my ($account) = split /\//, $branch, 2;
-    my $remotes = `git remote`;
-    unless ($remotes =~ /^\Q$account\E$/m) {
-        # no remote
-        print "Adding remote $account\n";
-        print `git remote add $account git://github.com/$account/phpbb3.git`;
-    }
+    unless ($account =~ /^develop($|-)/) {
+        my $remotes = `git remote`;
+        unless ($remotes =~ /^\Q$account\E$/m) {
+            # no remote
+            print "Adding remote $account\n";
+            print `git remote add $account git://github.com/$account/phpbb3.git`;
+        }
 
-    print `git fetch $account`;
+        print `git fetch $account`;
+    }
 }
 
 unless ($continue) {
