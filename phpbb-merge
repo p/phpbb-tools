@@ -78,7 +78,7 @@ unless ($continue) {
         ($branch, $pr, $target) = @ARGV;
     }
     
-    if (!$pr) {
+    if (!$pr && $branch) {
         my $try_pr = $branch;
         $try_pr = 0 + $try_pr;
         $_ = `curl -s https://api.github.com/repos/phpbb/phpbb3/pulls/$try_pr`;
