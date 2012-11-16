@@ -8,9 +8,28 @@
 # phpbb-merge galaxyAbstractor/ticket/10836 771 develop-olympus
 # phpbb-merge galaxyAbstractor/ticket/10836 771 o
 #
+# The first argument is branch name, the second argument is PR number
+# to be included in merge commit message, the third argument is target branch.
+#
+# Target branch can be omitted, in which case it will be figured out
+# based on the ancestry of the branch being merged. Specifying target branch
+# is most useful when merging into prep-release branches.
+#
+# Branch name can be omitted also, in which case it will be derived from
+# the PR via github api. Internet access is required for this to work.
+#
 # Merging develop-olympus into develop:
 #
 # phpbb-merge -d
+#
+# This should also work for forwarding merges from prep-release-* to
+# develop-olympus. -d will forward until it reaches develop.
+#
+# The last useful option is -n for --no-commit. This will stop before
+# committing the merge as the corresponding option to git will.
+# Useful, for example, when develop-olympus merges into develop automatically
+# but develop-olympus changes are not applicable to develop and the merge
+# actually should be a no-op.
 
 use strict;
 use warnings;
