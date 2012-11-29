@@ -1,26 +1,45 @@
 #!/usr/bin/env perl
 
-die "Usage: phpbb-reformat file ..." unless @ARGV;
+use strict;
 
-if ($ARGV[0] == '-8') {
-    $indent = 8;
-    shift @ARGV;
-} elsif ($ARGV[0] == '-2') {
-    $indent = 2;
-    shift @ARGV;
-} else {
-    $indent = undef;
+die "Usage: phpbb-reformat [-2|-8] [-i] file ..." unless @ARGV;
+
+my $indent = undef;
+my $ignore = 0;
+
+while (@ARGV > 0 && $ARGV[0] =~ /^-/) {
+    if ($ARGV[0] eq '-8') {
+        $indent = 8;
+        shift @ARGV;
+    } elsif ($ARGV[0] eq '-2') {
+        $indent = 2;
+        shift @ARGV;
+    } elsif ($ARGV[0] eq '-i') {
+        $ignore = 1;
+        shift @ARGV;
+    } else {
+        warn "Unrecognized option: $ARGV[0]\n";
+        exit 5;
+    }
 }
 
 undef $/;
-for $file (@ARGV) {
+for my $file (@ARGV) {
     # strip leading a/ or b/
     $file =~ s.^[ab]/..;
     
-    open FH, $file or die "Can't open file for reading: $file";
+    if (!open FH, $file) {
+        if ($ignore) {
+            warn "Can't open file for reading: $file";
+            next;
+        } else {
+            die "Can't open file for reading: $file";
+        }
+    }
     $_ = <FH>;
     close FH;
     
+    my $rep;
     if ($indent) {
         $rep = $indent;
     } else {
