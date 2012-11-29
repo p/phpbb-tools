@@ -12,4 +12,5 @@ test -z "$version" && {
 	--with-pgsql=/usr/local \
 	--with-pdo-pgsql=/usr/local \
 	--with-mysql=/usr/local \
-	--with-pdo-mysql=/usr/local
+	--with-pdo-mysql=/usr/local \
+	--with-curl=/usr/local
