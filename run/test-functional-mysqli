@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+
+cd
+rsync --delete --exclude .git -av  ~/phpbb/ /var/www/qi/boards/functional/
+cd /var/www/qi/boards/functional/
+mkdir -p phpBB/cache
+chmod -R o+w phpBB/cache
+
+PHPBB_TEST_DBNAME=phpbbtest \
+PHPBB_TEST_DBHOST=localhost \
+PHPBB_TEST_DBUSER=phpbbtest \
+PHPBB_TEST_DBMS=mysqli \
+PHPBB_NO_COMPOSER_AUTOLOAD=1 \
+PHPBB_AUTOLOAD=~/shared/phpbb_autoload.php \
+PHPBB_FUNCTIONAL_URL=http://localqi/boards/functional/phpBB/ \
+php -d include_path=.:/home/pie/apps/git-phpunit-bundle:/home/pie/apps/git-phpbb3-dependencies \
+~pie/apps/git-phpunit-bundle/phpunit.php -c phpunit.xml.functional "$@"
