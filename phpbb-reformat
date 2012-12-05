@@ -52,7 +52,7 @@ for my $file (@ARGV) {
     
     s|^(( {$rep})+)|"\t" x (length($1) / $rep)|gem;
     s|^(\t*)(.*) \{$|$1$2\n${1}{|gm;
-    s/^(\t*)} else/\1}\n\1else/gm;
+    s/^(\t*)} (else|catch)/\1}\n\1\2/gm;
     s/^(\t*)$//gm;
     
     open FH, ">$file" or die "Can't open file for writing: $file";
