@@ -9,8 +9,15 @@ test -z "$version" && {
 
 ./configure --prefix=$HOME/opt/php$version \
 	--enable-fpm \
-	--with-pgsql=/usr/local \
 	--with-pdo-pgsql=/usr/local \
 	--with-mysql=/usr/local \
 	--with-pdo-mysql=/usr/local \
 	--with-curl=/usr/local
+
+# additional extensions:
+#
+# zlib
+# bz2
+# mysql (does not build standalone for some reason)
+# pgsql
+# pcntl
