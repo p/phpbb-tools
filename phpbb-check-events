@@ -1,0 +1,56 @@
+#!/usr/bin/env perl
+
+package main;
+
+use strict;
+use warnings;
+
+my @used_events;
+
+open FIND, "find phpBB/styles phpBB/adm/style -name '*.html' |" or die $!;
+while (<FIND>) {
+    chop;
+    open FILE, $_ or die $!;
+    while (<FILE>) {
+        foreach (/<!--\s+EVENT\s+(\S+)\s+-->/g) {
+            push @used_events, $_;
+        }
+    }
+    close FILE;
+}
+close FIND;
+
+undef $/;
+open F, 'phpBB/docs/events.md' or die $!;
+$_ = <F>;
+close F;
+
+my @defined_events;
+my %defined_events;
+foreach (/^(\w+)\n===/gm) {
+    push @defined_events, $_;
+    if ($defined_events{$_}) {
+        print "Event $_ redefined\n";
+    }
+    $defined_events{$_} = 1;
+}
+
+my @sorted_defined_events = sort { $a cmp $b } @defined_events;
+if (join(' ', @defined_events) ne join(' ', @sorted_defined_events)) {
+    print "Defined events are not ordered alphabetically\n";
+}
+
+my (%used_events, %complained);
+foreach (@used_events) {
+    $used_events{$_} = 1;
+    if (!$defined_events{$_} && !$complained{$_}) {
+        print "$_ event is used but not defined\n";
+        $complained{$_} = 1;
+    }
+}
+
+foreach (@defined_events) {
+    if (!$used_events{$_}) {
+        print "$_ event is defined but not used\n";
+    }
+}
