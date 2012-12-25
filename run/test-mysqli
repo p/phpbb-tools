@@ -12,5 +12,5 @@ PHPBB_TEST_DBUSER=phpbbtest \
 PHPBB_TEST_DBMS=mysqli \
 PHPBB_NO_COMPOSER_AUTOLOAD=1 \
 PHPBB_AUTOLOAD=~/shared/phpbb_autoload.php \
-time php -d include_path=.:/home/pie/apps/git-phpunit-bundle:/home/pie/apps/git-phpbb3-dependencies \
-~pie/apps/git-phpunit-bundle/phpunit.php "$@"
+time php -d include_path=.:/home/pie/apps/git-phpbb/phpunit-bundle:/home/pie/apps/git-phpbb3-dependencies \
+~pie/apps/git-phpbb/phpunit-bundle/phpunit.php "$@"

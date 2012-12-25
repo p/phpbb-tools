@@ -15,5 +15,5 @@ PHPBB_TEST_DBMS=postgres \
 PHPBB_NO_COMPOSER_AUTOLOAD=1 \
 PHPBB_AUTOLOAD=~/shared/phpbb_autoload.php \
 PHPBB_FUNCTIONAL_URL=http://localqi/boards/functional/phpBB/ \
-php -d include_path=.:/home/pie/apps/git-phpunit-bundle:/home/pie/apps/git-phpbb3-dependencies \
-~pie/apps/git-phpunit-bundle/phpunit.php -c phpunit.xml.functional "$@"
+php -d include_path=.:/home/pie/apps/git-phpbb/phpunit-bundle:/home/pie/apps/git-phpbb3-dependencies \
+~pie/apps/git-phpbb/phpunit-bundle/phpunit.php -c phpunit.xml.functional "$@"
