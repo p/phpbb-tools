@@ -3,9 +3,9 @@
 use warnings;
 use strict;
 
-my $home = $ENV{HOME};
-system {'rsync'} (qw,rsync --delete --exclude .git -av,, "$home/phpbb/", "$home/test-phpbb");
-chdir "$home/test-phpbb";
+#my $home = $ENV{HOME};
+#system {'rsync'} (qw,rsync --delete --exclude .git -av,, "$home/phpbb/", "$home/test-phpbb");
+#chdir "$home/test-phpbb";
 
 my @flags = qw/-h/;
 my @singles = qw/--printer/;
@@ -42,8 +42,8 @@ while (@ARGV > 0) {
     }
 }
 
-$ENV{PHPBB_NO_COMPOSER_AUTOLOAD} = 1;
-$ENV{PHPBB_AUTOLOAD} = "$home/shared/phpbb_autoload.php";
+#$ENV{PHPBB_NO_COMPOSER_AUTOLOAD} = 1;
+#$ENV{PHPBB_AUTOLOAD} = "$home/shared/phpbb_autoload.php";
 
 my $phpbb_tools_test_driver_config = $ENV{phpbb_tools_test_driver_config};
 
