@@ -1,12 +1,20 @@
-#!/bin/sh
+#!/usr/bin/env perl
 
-cd
-cd test-phpbb
-rsync --delete --exclude .git -av  ~/phpbb/ ./
+use warnings;
+use strict;
 
-PHPBB_NO_COMPOSER_AUTOLOAD=1 \
-PHPBB_AUTOLOAD=~/shared/phpbb_autoload.php \
-time php -d include_path=.:/home/pie/apps/git-phpbb/phpunit-bundle:/home/pie/apps/git-phpbb/deps \
-~pie/apps/git-phpbb/phpunit-bundle/phpunit.php \
-	-c "$phpbb_tools_test_driver_config" \
-	"$@"
+my $home = $ENV{HOME};
+system {'rsync'} (qw,rsync --delete --exclude .git -av,, "$home/phpbb/", "$home/test-phpbb");
+chdir "$home/test-phpbb";
+
+$ENV{PHPBB_NO_COMPOSER_AUTOLOAD} = 1;
+$ENV{PHPBB_AUTOLOAD} = "$home/shared/phpbb_autoload.php";
+
+my $phpbb_tools_test_driver_config = $ENV{phpbb_tools_test_driver_config};
+
+my @args = (qw,php -d include_path=.:/home/pie/apps/git-phpbb/phpunit-bundle:/home/pie/apps/git-phpbb/deps
+/home/pie/apps/git-phpbb/phpunit-bundle/phpunit.php
+	-c,, $phpbb_tools_test_driver_config);
+@args = (@args, @ARGV);
+
+exec {'php'} @args;
