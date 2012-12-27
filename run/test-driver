@@ -1,0 +1,12 @@
+#!/bin/sh
+
+cd
+cd test-phpbb
+rsync --delete --exclude .git -av  ~/phpbb/ ./
+
+PHPBB_NO_COMPOSER_AUTOLOAD=1 \
+PHPBB_AUTOLOAD=~/shared/phpbb_autoload.php \
+time php -d include_path=.:/home/pie/apps/git-phpbb/phpunit-bundle:/home/pie/apps/git-phpbb/deps \
+~pie/apps/git-phpbb/phpunit-bundle/phpunit.php \
+	-c "$phpbb_tools_test_driver_config" \
+	"$@"
