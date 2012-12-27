@@ -7,6 +7,41 @@ my $home = $ENV{HOME};
 system {'rsync'} (qw,rsync --delete --exclude .git -av,, "$home/phpbb/", "$home/test-phpbb");
 chdir "$home/test-phpbb";
 
+my @flags = qw/-h/;
+my @singles = qw/--printer/;
+my @opts;
+
+my @files;
+while (@ARGV > 0) {
+    $a = shift @ARGV;
+    if (grep /\Q$a\E/, @flags) {
+        # phpunit option with no arguments
+        push @opts, $a;
+    } elsif (grep /\Q$a\E/, @singles) {
+        # phpunit option with a single argument
+        push @opts, $a;
+        push @opts, shift @ARGV;
+    } elsif (-e $a) {
+        # full file or directory
+        push @files, $a;
+    } elsif ($a =~ /[\*\?\{\}]/) {
+        # shell glob
+        my @these = glob $a;
+        @files = (@files, @these);
+    } else {
+        # literal
+        #open F, 'find tests -type d -or "(" -type f -name "*.php" ")"|' or die "find failed";
+        open F, 'find tests -type f -name "*_test.php" |' or die "find failed";
+        while (<F>) {
+            if (/$a/) {
+                chomp;
+                push @files, $_;
+            }
+        }
+        close F;
+    }
+}
+
 $ENV{PHPBB_NO_COMPOSER_AUTOLOAD} = 1;
 $ENV{PHPBB_AUTOLOAD} = "$home/shared/phpbb_autoload.php";
 
@@ -15,6 +50,10 @@ my $phpbb_tools_test_driver_config = $ENV{phpbb_tools_test_driver_config};
 my @args = (qw,php -d include_path=.:/home/pie/apps/git-phpbb/phpunit-bundle:/home/pie/apps/git-phpbb/deps
 /home/pie/apps/git-phpbb/phpunit-bundle/phpunit.php
 	-c,, $phpbb_tools_test_driver_config);
-@args = (@args, @ARGV);
 
-exec {'php'} @args;
+foreach (@files) {
+    my @these_args = (@args, @opts, $_);
+
+    print "Testing $_\n";
+    system {'php'} @these_args;
+}
