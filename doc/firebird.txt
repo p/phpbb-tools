@@ -1,0 +1,10 @@
+Connecting to a local Firebird database:
+
+Hostname or DSN: blank
+Port: blank
+Database name: /var/db/firebird/i5.fdb
+Database username: phpbbtest
+Database password: phpbbtest
+Prefix: phpbb_
+
+Apparently blank username and password also work?
