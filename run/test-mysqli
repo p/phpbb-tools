@@ -2,15 +2,16 @@
 
 set -e
 
-cd
-cd test-phpbb
-rsync --delete --exclude .git -av  ~/phpbb/ ./
+test -f "$0" && (echo "$0" |grep -q /) || {
+	echo "Please invoke with a path." 1>&2
+	exit 10
+}
 
+export \
 PHPBB_TEST_DBNAME=phpbbtest \
 PHPBB_TEST_DBHOST=localhost \
 PHPBB_TEST_DBUSER=phpbbtest \
 PHPBB_TEST_DBMS=mysqli \
-PHPBB_NO_COMPOSER_AUTOLOAD=1 \
-PHPBB_AUTOLOAD=~/shared/phpbb_autoload.php \
-time php -d include_path=.:/home/pie/apps/git-phpbb/phpunit-bundle:/home/pie/apps/git-phpbb/deps \
-~pie/apps/git-phpbb/phpunit-bundle/phpunit.php "$@"
+phpbb_tools_test_driver_config=phpunit.xml.dist
+
+exec `dirname "$0"`/test-driver "$@"
