@@ -51,9 +51,14 @@ my @args = (qw,php -d include_path=.:/home/pie/apps/git-phpbb/phpunit-bundle:/ho
 /home/pie/apps/git-phpbb/phpunit-bundle/phpunit.php
 	-c,, $phpbb_tools_test_driver_config);
 
-foreach (@files) {
-    my @these_args = (@args, @opts, $_);
+if (@files) {
+    foreach (@files) {
+        my @these_args = (@args, @opts, $_);
 
-    print "Testing $_\n";
-    system {'php'} @these_args;
+        print "Testing $_\n";
+        system {'php'} @these_args;
+    }
+} else {
+    my @these_args = (@args, @opts);
+    exec {'php'} @these_args;
 }

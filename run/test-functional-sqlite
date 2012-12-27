@@ -2,18 +2,25 @@
 
 set -e
 
+test -f "$0" && (echo "$0" |grep -q /) || {
+	echo "Please invoke with a path." 1>&2
+	exit 10
+}
+
 cd
 rsync --delete --exclude .git -av  ~/phpbb/ /var/www/qi/boards/functional/
 cd /var/www/qi/boards/functional/
 mkdir -p phpBB/cache
 chmod -R o+w phpBB/cache
 
+export \
 PHPBB_TEST_DBNAME=phpbbtest \
 PHPBB_TEST_DBHOST=localhost \
 PHPBB_TEST_DBUSER=phpbbtest \
 PHPBB_TEST_DBMS=sqlite \
 PHPBB_NO_COMPOSER_AUTOLOAD=1 \
-PHPBB_AUTOLOAD=~/shared/phpbb_autoload.php \
+PHPBB_AUTOLOAD=$HOME/shared/phpbb_autoload.php \
 PHPBB_FUNCTIONAL_URL=http://localqi/boards/functional/phpBB/ \
-php -d include_path=.:/home/pie/apps/git-phpbb/phpunit-bundle:/home/pie/apps/git-phpbb/deps \
-~pie/apps/git-phpbb/phpunit-bundle/phpunit.php -c phpunit.xml.functional "$@"
+phpbb_tools_test_driver_config=phpunit.xml.functional
+
+exec `dirname "$0"`/test-driver "$@"
