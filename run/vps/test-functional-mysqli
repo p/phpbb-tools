@@ -1,0 +1,8 @@
+#!/bin/sh
+
+PHPBB_TEST_DBNAME=functional \
+PHPBB_TEST_DBHOST=localhost \
+PHPBB_TEST_DBUSER=root \
+PHPBB_TEST_DBMS=mysqli \
+PHPBB_FUNCTIONAL_URL=http://localhost/functional/ \
+phpunit -c phpunit.xml.functional
