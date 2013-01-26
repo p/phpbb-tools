@@ -1,9 +1,13 @@
 #!/bin/sh
 
+set -e
+
 for project in \
 	wolis-develop-olympus-mysql \
+	wolis-develop-olympus-mysqli \
 	wolis-develop-olympus-postgres \
 	wolis-develop-mysql \
+	wolis-develop-mysqli \
 	wolis-develop-postgres \
 ; do
 	curl -nX POST http://integrity.vps.hxr.me/$project/builds
