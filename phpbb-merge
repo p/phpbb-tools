@@ -189,3 +189,13 @@ if ($forward && $target eq 'develop') {
         unlink($state_file);
     }
 }
+
+if ($forward) {
+    `git diff HEAD^..HEAD |egrep -q 'case.*(postgres|mysql|sqlite|firebird|oracle|mssql|odbc)'`;
+    if ($? == 0) {
+        print "Warning: diff includes switching on database driver.\n";
+        print "Check that driver names do not need to be changed to phpbb_db_driver_*:\n";
+        print "\n";
+    }
+    print `git diff HEAD^..HEAD |egrep 'case.*(postgres|mysql|sqlite|firebird|oracle|mssql|odbc)'`;
+}
