@@ -10,8 +10,11 @@ my @branches = qw(develop develop-olympus);
 # wolis
 
 for my $branch (@branches) {
+    my $nbranch = $branch;
+    # messes with the order
+    $nbranch =~ s/develop-//;
     for my $db (@dbs) {
-        my $pname = "wolis-$branch-$db";
+        my $pname = "wolis-$nbranch-$db";
         my $prepo = "git://github.com/p/wolis";
         my $pbranch = "master";
         my $pscript = <<EOT;
@@ -22,11 +25,10 @@ pip install -r requirements.txt &&
 EOT
         create_or_update($pname, $prepo, $pbranch, $pscript);
         
-        $pname = "unit-$branch-$db";
+        $pname = "unit-$nbranch-$db";
         $prepo = "git://github.com/phpbb/phpbb3";
         $pbranch = $branch;
         $pscript = <<EOT;
-sh -xc '
 git cclone git://github.com/p/phpunit-bundle phpunit-bundle &&
 cd phpBB &&
 php ../composer.phar install --dev &&
@@ -37,13 +39,16 @@ PHPBB_TEST_DBUSER=phpbbtest \
 PHPBB_TEST_DBPASS=phpbbtest \
 PHPBB_TEST_DBMS=$db \
 php -d include_path=.:`pwd`/phpunit-bundle phpunit-bundle/phpunit.php -c phpunit.xml.dist --verbose
-'
 EOT
+        create_or_update($pname, $prepo, $pbranch, $pscript);
+        
+        $pname =~ s/unit-/functional-/;
+        $pscript =~ s/phpunit.xml.dist/phpunit.xml.functional/;
         create_or_update($pname, $prepo, $pbranch, $pscript);
     }
     
     my $db = 'nodb';
-    my $pname = "unit-$branch-$db";
+    my $pname = "unit-$nbranch-$db";
     my $prepo = "git://github.com/phpbb/phpbb3";
     my $pbranch = $branch;
     my $pscript = <<EOT;

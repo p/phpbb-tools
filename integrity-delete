@@ -1,0 +1,10 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+my $host = 'http://integrity.vps.hxr.me/';
+my $text = `curl -s $host`;
+while ($text =~ /(\/[\w-]+)/g) {
+    print `curl -nX DELETE $host$1 1>/dev/null 2>&1`;
+}

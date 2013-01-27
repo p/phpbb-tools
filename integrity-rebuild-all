@@ -2,13 +2,20 @@
 
 set -e
 
+genp() {
+	for branch in develop olympus; do
+		for db in mysql mysqli postgres; do
+			for target in unit functional wolis; do
+				echo "$target-$branch-$db"
+			done
+		done
+	done
+}
+
 for project in \
-	wolis-develop-olympus-mysql \
-	wolis-develop-olympus-mysqli \
-	wolis-develop-olympus-postgres \
-	wolis-develop-mysql \
-	wolis-develop-mysqli \
-	wolis-develop-postgres \
+	`genp` \
+	unit-develop-nodb \
+	unit-olympus-nodb \
 ; do
 	curl -nX POST http://integrity.vps.hxr.me/$project/builds
 done
