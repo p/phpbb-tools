@@ -1,0 +1,83 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+my $host = "http://integrity.vps.hxr.me";
+my @dbs = qw(mysql mysqli postgres);
+my @branches = qw(develop develop-olympus);
+
+# wolis
+
+for my $branch (@branches) {
+    for my $db (@dbs) {
+        my $pname = "wolis-$branch-$db";
+        my $prepo = "git://github.com/p/wolis";
+        my $pbranch = "master";
+        my $pscript = <<EOT;
+virtualenv venv &&
+. ./venv/bin/activate &&
+pip install -r requirements.txt &&
+./script/run -c config/vps.yaml -b $branch -d $db
+EOT
+        create_or_update($pname, $prepo, $pbranch, $pscript);
+        
+        $pname = "unit-$branch-$db";
+        $prepo = "git://github.com/phpbb/phpbb3";
+        $pbranch = $branch;
+        $pscript = <<EOT;
+sh -xc '
+git cclone git://github.com/p/phpunit-bundle phpunit-bundle &&
+cd phpBB &&
+php ../composer.phar install --dev &&
+cd .. &&
+PHPBB_TEST_DBNAME=phpbbtest \
+PHPBB_TEST_DBHOST=127.0.0.1 \
+PHPBB_TEST_DBUSER=phpbbtest \
+PHPBB_TEST_DBPASS=phpbbtest \
+PHPBB_TEST_DBMS=$db \
+php -d include_path=.:`pwd`/phpunit-bundle phpunit-bundle/phpunit.php -c phpunit.xml.dist --verbose
+'
+EOT
+        create_or_update($pname, $prepo, $pbranch, $pscript);
+    }
+    
+    my $db = 'nodb';
+    my $pname = "unit-$branch-$db";
+    my $prepo = "git://github.com/phpbb/phpbb3";
+    my $pbranch = $branch;
+    my $pscript = <<EOT;
+git cclone git://github.com/p/phpunit-bundle phpunit-bundle &&
+cd phpBB &&
+php ../composer.phar install --dev &&
+cd .. &&
+php -d include_path=.:`pwd`/phpunit-bundle phpunit-bundle/phpunit.php -c phpunit.xml.dist --verbose
+EOT
+    create_or_update($pname, $prepo, $pbranch, $pscript);
+}
+
+sub create_or_update {
+    my ($pname, $prepo, $pbranch, $pscript) = @_;
+    $prepo = urlencode($prepo);
+    $pbranch = urlencode($pbranch);
+    $pscript = urlencode($pscript);
+    my $query = "project_data[name]=$pname&project_data[uri]=$prepo&project_data[branch]=$pbranch&project_data[command]=$pscript&project_data[public]=1";
+    
+    `curl -fsn $host/$pname`;
+    if ($? == 0) {
+        # exists
+        print "$pname exists\n";
+        print `curl -snX PUT -d '$query' $host/$pname`;
+    } else {
+        # does not exist
+        print "$pname does not exist\n";
+        print `curl -snX POST -d '$query' $host/`;
+    }
+}
+
+sub urlencode {
+    my $s = shift;
+    $s =~ s/ /+/g;
+    $s =~ s/([^A-Za-z0-9\+-])/sprintf("%%%02X", ord($1))/seg;
+    return $s;
+}
