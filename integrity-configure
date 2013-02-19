@@ -10,30 +10,31 @@ use warnings;
 
 my $host = "http://integrity.vps.hxr.me";
 my @dbs = qw(mysql mysqli postgres);
-my @branches = qw(develop develop-olympus);
+my @branches = qw(develop olympus);
+my %branch_map = ('olympus', 'develop-olympus');
+my @repos = qw(p upstream);
+my %repo_map = ('upstream', 'phpbb');
 
-# wolis
-
-for my $branch (@branches) {
-    my $nbranch = $branch;
-    # messes with the order
-    $nbranch =~ s/develop-//;
-    for my $db (@dbs) {
-        my $pname = "wolis-$nbranch-$db";
-        my $prepo = "git://github.com/p/wolis";
-        my $pbranch = "master";
-        my $pscript = <<EOT;
+for my $repo (@repos) {
+    my $ghrepo = $repo_map{$repo} || $repo;
+    for my $branch (@branches) {
+        my $ghbranch = $branch_map{$branch} || $branch;
+        for my $db (@dbs) {
+            my $pname = "$repo-wolis-$branch-$db";
+            my $prepo = "git://github.com/p/wolis";
+            my $pbranch = "master";
+            my $pscript = <<EOT;
 virtualenv venv &&
 . ./venv/bin/activate &&
 pip install -r requirements.txt &&
-./script/run -c config/vps.yaml -b $branch -d $db
+./script/run -c config/vps.yaml -s git://github.com/$ghrepo/phpbb3 -b $ghbranch -d $db
 EOT
-        create_or_update($pname, $prepo, $pbranch, $pscript);
-        
-        $pname = "unit-$nbranch-$db";
-        $prepo = "git://github.com/phpbb/phpbb3";
-        $pbranch = $branch;
-        $pscript = <<EOT;
+            create_or_update($pname, $prepo, $pbranch, $pscript);
+            
+            $pname = "$repo-unit-$branch-$db";
+            $prepo = "git://github.com/$ghrepo/phpbb3";
+            $pbranch = $ghbranch;
+            $pscript = <<EOT;
 git cclone git://github.com/p/phpunit-bundle phpunit-bundle &&
 cd phpBB &&
 php ../composer.phar install --dev &&
@@ -45,25 +46,26 @@ export PHPBB_TEST_DBPASSWD=phpbbtest &&
 export PHPBB_TEST_DBMS=$db &&
 php -d include_path=.:`pwd`/phpunit-bundle phpunit-bundle/phpunit.php -c phpunit.xml.dist --verbose
 EOT
-        create_or_update($pname, $prepo, $pbranch, $pscript);
+            create_or_update($pname, $prepo, $pbranch, $pscript);
+            
+            $pname =~ s/unit-/functional-/;
+            $pscript =~ s/phpunit.xml.dist/phpunit.xml.functional/;
+            create_or_update($pname, $prepo, $pbranch, $pscript);
+        }
         
-        $pname =~ s/unit-/functional-/;
-        $pscript =~ s/phpunit.xml.dist/phpunit.xml.functional/;
-        create_or_update($pname, $prepo, $pbranch, $pscript);
-    }
-    
-    my $db = 'nodb';
-    my $pname = "unit-$nbranch-$db";
-    my $prepo = "git://github.com/phpbb/phpbb3";
-    my $pbranch = $branch;
-    my $pscript = <<EOT;
+        my $db = 'nodb';
+        my $pname = "$repo-unit-$branch-$db";
+        my $prepo = "git://github.com/$repo/phpbb3";
+        my $pbranch = $branch;
+        my $pscript = <<EOT;
 git cclone git://github.com/p/phpunit-bundle phpunit-bundle &&
 cd phpBB &&
 php ../composer.phar install --dev &&
 cd .. &&
 php -d include_path=.:`pwd`/phpunit-bundle phpunit-bundle/phpunit.php -c phpunit.xml.dist --verbose
 EOT
-    create_or_update($pname, $prepo, $pbranch, $pscript);
+        create_or_update($pname, $prepo, $pbranch, $pscript);
+    }
 }
 
 sub create_or_update {
