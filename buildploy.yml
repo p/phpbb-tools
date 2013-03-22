@@ -1,0 +1,4 @@
+src_repo: /home/pie/apps/phpbb/tools
+deploy_repo: git@github.com:phpbb-tools-build.git
+work_prefix: /home/appbuild/phpbb-tools-build
+build_cmd: make
