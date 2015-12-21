@@ -17,7 +17,7 @@ base=`realpath "$base"`
 fail=false
 
 for run in "$@"; do
-	echo "Runing $run"
+	echo "Running $run"
 	run=`echo "$run" |sed -e s/unit-// -e s/postgres/pg/`
 	full="$base"/test-"$run"
 	if ! sudo -u "$runner" "$full"; then
